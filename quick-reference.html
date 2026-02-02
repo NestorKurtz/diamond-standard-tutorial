@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Reference - Diamond Standard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .ref-window {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+    }
+
+    .ref-header {
+      background: linear-gradient(135deg, #0f3460, #533483);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ref-header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .ref-header .icon {
+      font-size: 20px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-bar {
+      padding: 12px 16px;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #0f3460;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-bar input:focus {
+      border-color: #533483;
+    }
+
+    .search-bar input::placeholder {
+      color: #666;
+    }
+
+    .entries {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .entries::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .entries::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .entries::-webkit-scrollbar-thumb {
+      background: #0f3460;
+      border-radius: 3px;
+    }
+
+    .entry {
+      border-bottom: 1px solid rgba(15, 52, 96, 0.4);
+    }
+
+    .entry:last-child {
+      border-bottom: none;
+    }
+
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .entry-header:hover {
+      background: rgba(83, 52, 131, 0.15);
+    }
+
+    .entry-term {
+      font-weight: 600;
+      font-size: 14px;
+      color: #e94560;
+    }
+
+    .entry-short {
+      font-size: 13px;
+      color: #b0b0b0;
+      padding: 0 16px 10px 16px;
+      line-height: 1.5;
+    }
+
+    .entry-expand-btn {
+      font-size: 11px;
+      color: #533483;
+      background: rgba(83, 52, 131, 0.15);
+      border: 1px solid rgba(83, 52, 131, 0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .entry-expand-btn:hover {
+      background: rgba(83, 52, 131, 0.3);
+      color: #fff;
+    }
+
+    .entry-long {
+      display: none;
+      font-size: 13px;
+      color: #c0c0c0;
+      padding: 0 16px 12px 16px;
+      line-height: 1.6;
+      background: rgba(15, 52, 96, 0.15);
+      border-left: 3px solid #533483;
+      margin: 0 12px 8px 12px;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+    }
+
+    .entry-long.visible {
+      display: block;
+    }
+
+    .entry-long code {
+      background: #1a1a2e;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #e94560;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #666;
+      padding: 24px 16px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 8px;
+      font-weight: 400;
+    }
+
+    .tag-core { background: rgba(233, 69, 96, 0.2); color: #e94560; }
+    .tag-facet { background: rgba(83, 52, 131, 0.3); color: #a78bfa; }
+    .tag-storage { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .tag-pattern { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+  </style>
+</head>
+<body>
+
+<div class="ref-window">
+  <div class="ref-header">
+    <div class="icon">&#128218;</div>
+    <h1>Quick Reference &mdash; Diamond Standard</h1>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Begriff suchen..." autofocus>
+  </div>
+
+  <div class="entries" id="entries"></div>
+  <div class="no-results" id="noResults">Kein Eintrag gefunden.</div>
+</div>
+
+<script>
+const lexicon = [
+  {
+    term: "Diamond (EIP-2535)",
+    tag: "core", tagLabel: "Core",
+    short: "Ein Proxy-Contract, der Calls an verschiedene Facets delegiert. Der zentrale Einstiegspunkt.",
+    long: "Der Diamond ist ein Smart Contract, der als einziger Einstiegspunkt dient. Er nutzt <code>delegatecall</code>, um Funktionsaufrufe an die passenden Facets weiterzuleiten. Der Diamond selbst speichert den gesamten State, die Facets liefern nur die Logik. Das ermoeglicht modulare, upgradebare Contracts ohne Storage-Konflikte. Definiert in EIP-2535 von Nick Mudge."
+  },
+  {
+    term: "Facet",
+    tag: "facet", tagLabel: "Facet",
+    short: "Ein stateless Logik-Contract, der dem Diamond Funktionen hinzufuegt.",
+    long: "Facets sind eigenstaendige Contracts, die Funktionslogik bereitstellen. Sie werden per <code>diamondCut</code> registriert. Der Diamond ruft sie via <code>delegatecall</code> auf, d.h. sie arbeiten im Storage-Kontext des Diamonds. Ein Facet kann beliebig viele Funktionen enthalten. Facets koennen hinzugefuegt, ersetzt oder entfernt werden, ohne den restlichen Code zu beruehren."
+  },
+  {
+    term: "DiamondCut",
+    tag: "core", tagLabel: "Core",
+    short: "Funktion zum Hinzufuegen, Ersetzen oder Entfernen von Facets.",
+    long: "Die <code>diamondCut()</code> Funktion ist das Upgrade-Werkzeug des Diamonds. Sie nimmt ein Array von FacetCut-Structs entgegen, die jeweils eine Facet-Adresse, eine Action (Add/Replace/Remove) und ein Array von Funktions-Selektoren enthalten. Optional kann eine Init-Adresse mit Calldata uebergeben werden, die nach dem Cut ausgefuehrt wird (z.B. fuer Storage-Migration). Emittiert ein <code>DiamondCut</code> Event."
+  },
+  {
+    term: "DiamondLoupe",
+    tag: "facet", tagLabel: "Facet",
+    short: "Introspection-Facet: zeigt, welche Facets und Funktionen registriert sind.",
+    long: "Das DiamondLoupe-Facet implementiert EIP-2535s Introspection-Interface. Es bietet Funktionen wie <code>facets()</code>, <code>facetFunctionSelectors()</code>, <code>facetAddresses()</code> und <code>facetAddress()</code>. Damit kann jeder on-chain pruefen, welche Funktionen der Diamond unterstuetzt und welches Facet sie implementiert. Pflicht-Facet laut Standard."
+  },
+  {
+    term: "Function Selector",
+    tag: "core", tagLabel: "Core",
+    short: "Die ersten 4 Bytes des keccak256-Hashes einer Funktionssignatur.",
+    long: "Jede Funktion wird durch ihren Selector identifiziert: <code>bytes4(keccak256(\"transfer(address,uint256)\"))</code>. Der Diamond nutzt ein Mapping von Selector zu Facet-Adresse, um eingehende Calls an das richtige Facet weiterzuleiten. Zwei Funktionen mit dem gleichen Selector koennen nicht gleichzeitig im Diamond existieren."
+  },
+  {
+    term: "delegatecall",
+    tag: "pattern", tagLabel: "Pattern",
+    short: "EVM-Opcode: fuehrt Code eines anderen Contracts im eigenen Storage-Kontext aus.",
+    long: "Mit <code>delegatecall</code> wird der Code des Ziel-Contracts (Facet) ausgefuehrt, aber <code>msg.sender</code>, <code>msg.value</code> und der Storage bleiben die des aufrufenden Contracts (Diamond). Das ist der Kernmechanismus, der es ermoeglicht, Logik in Facets auszulagern, waehrend der State zentral im Diamond bleibt. Wichtig: Storage-Layout-Kompatibilitaet muss manuell sichergestellt werden."
+  },
+  {
+    term: "Diamond Storage",
+    tag: "storage", tagLabel: "Storage",
+    short: "Storage-Pattern mit namespaced Structs an festen Slot-Positionen.",
+    long: "Diamond Storage vermeidet Slot-Kollisionen, indem jedes Facet seinen eigenen Struct an einer festen Position speichert: <code>bytes32 position = keccak256(\"my.facet.storage\")</code>. Per Assembly wird der Struct-Pointer auf diesen Slot gesetzt. So koennen mehrere Facets unabhaengig voneinander Storage nutzen, ohne sich gegenseitig zu ueberschreiben. Empfohlenes Pattern fuer Diamond-Projekte."
+  },
+  {
+    term: "AppStorage",
+    tag: "storage", tagLabel: "Storage",
+    short: "Alternatives Pattern: ein einzelner, gemeinsamer Storage-Struct fuer alle Facets.",
+    long: "AppStorage nutzt Slot 0 fuer einen einzigen grossen Struct, auf den alle Facets zugreifen. Einfacher zu verwenden als Diamond Storage, aber neue Felder duerfen nur am Ende angehaengt werden (append-only), und Felder duerfen nie entfernt oder umgeordnet werden. Gut fuer Projekte, bei denen Facets viele gemeinsame Daten teilen. Kann mit Diamond Storage kombiniert werden."
+  },
+  {
+    term: "FacetCut Struct",
+    tag: "core", tagLabel: "Core",
+    short: "Datenstruktur fuer diamondCut: Facet-Adresse, Action und Selektoren.",
+    long: "Der FacetCut Struct hat drei Felder: <code>facetAddress</code> (Adresse des Facets), <code>action</code> (Add=0, Replace=1, Remove=2) und <code>functionSelectors</code> (Array von bytes4). Ein diamondCut-Aufruf nimmt ein Array von FacetCuts entgegen, sodass mehrere Facets in einer Transaktion hinzugefuegt/ersetzt/entfernt werden koennen."
+  },
+  {
+    term: "Fallback Function",
+    tag: "pattern", tagLabel: "Pattern",
+    short: "Die fallback() im Diamond leitet jeden Call an das passende Facet weiter.",
+    long: "Die <code>fallback()</code> Funktion ist das Herzstuck des Diamond-Proxys. Sie wird bei jedem Funktionsaufruf getriggert (ausser fuer im Diamond selbst definierte Funktionen). Sie liest den Selector aus <code>msg.data</code>, schlaegt die Facet-Adresse im Mapping nach und fuehrt <code>delegatecall</code> aus. Wenn kein Facet fuer den Selector registriert ist, wird reverted."
+  },
+  {
+    term: "ERC-165 (supportsInterface)",
+    tag: "pattern", tagLabel: "Pattern",
+    short: "Standard fuer Interface-Erkennung. Diamonds muessen es implementieren.",
+    long: "ERC-165 erlaubt es, on-chain abzufragen, ob ein Contract ein bestimmtes Interface unterstuetzt. Diamonds implementieren <code>supportsInterface(bytes4)</code> typischerweise als Facet. Beim Hinzufuegen neuer Facets sollte das entsprechende Interface registriert werden. Das DiamondLoupe-Interface und ERC-165 selbst sind Pflicht laut EIP-2535."
+  },
+  {
+    term: "Diamond Init",
+    tag: "core", tagLabel: "Core",
+    short: "Optionaler Init-Contract, der nach einem DiamondCut ausgefuehrt wird.",
+    long: "Beim <code>diamondCut()</code> kann eine Init-Adresse mit Calldata uebergeben werden. Nach dem Cut wird <code>delegatecall</code> auf diese Adresse ausgefuehrt. Typisch fuer: Storage initialisieren, ERC-165 Interfaces registrieren, Zugangsrechte setzen. Wird oft als separater Contract implementiert (<code>DiamondInit.sol</code>), kann aber auch ein bestehendes Facet sein."
+  },
+  {
+    term: "Ownership (DiamondOwner)",
+    tag: "facet", tagLabel: "Facet",
+    short: "Facet fuer Zugangssteuerung: wer darf diamondCut aufrufen?",
+    long: "Das OwnershipFacet implementiert <code>owner()</code> und <code>transferOwnership()</code>. Standardmaessig darf nur der Owner <code>diamondCut()</code> ausfuehren. Fuer komplexere Szenarien kann man Multi-Sig, DAO-Governance oder Timelock-Mechanismen einbauen. Die Ownership-Logik ist bewusst als Facet implementiert, damit sie selbst upgradebar ist."
+  },
+  {
+    term: "Storage Collision",
+    tag: "storage", tagLabel: "Storage",
+    short: "Wenn zwei Facets denselben Storage-Slot ueberschreiben &mdash; muss vermieden werden!",
+    long: "Da alle Facets im selben Storage-Kontext arbeiten, koennen Konflikte entstehen, wenn zwei Facets denselben Slot nutzen. Diamond Storage und AppStorage sind Patterns, um das zu verhindern. Bei Diamond Storage nutzt jedes Facet einen einzigartigen Hash als Basis-Slot. Bei AppStorage wird ein gemeinsamer Struct verwendet, der nur append-only erweitert werden darf."
+  },
+  {
+    term: "Upgradeability",
+    tag: "pattern", tagLabel: "Pattern",
+    short: "Facets koennen jederzeit per diamondCut ersetzt/entfernt werden.",
+    long: "Der Diamond Standard bietet maximale Upgradeability: Einzelne Funktionen koennen ersetzt werden, ohne andere zu beruehren. Neue Funktionen koennen hinzugefuegt werden. Alte koennen entfernt werden. Das alles atomar in einer Transaktion. Im Gegensatz zum TransparentProxy oder UUPS braucht man nicht den gesamten Logik-Contract zu ersetzen. Der State bleibt immer im Diamond erhalten."
+  }
+];
+
+const entriesContainer = document.getElementById("entries");
+const noResults = document.getElementById("noResults");
+const searchInput = document.getElementById("searchInput");
+
+function renderEntries(filter = "") {
+  const lower = filter.toLowerCase();
+  const filtered = lexicon.filter(e =>
+    e.term.toLowerCase().includes(lower) ||
+    e.short.toLowerCase().includes(lower) ||
+    e.long.toLowerCase().includes(lower)
+  );
+
+  entriesContainer.innerHTML = "";
+  noResults.style.display = filtered.length === 0 ? "block" : "none";
+
+  filtered.forEach((entry, idx) => {
+    const div = document.createElement("div");
+    div.className = "entry";
+    div.innerHTML = `
+      <div class="entry-header" data-idx="${idx}">
+        <span>
+          <span class="entry-term">${entry.term}</span>
+          <span class="tag tag-${entry.tag}">${entry.tagLabel}</span>
+        </span>
+        <button class="entry-expand-btn" data-idx="${idx}">mehr</button>
+      </div>
+      <div class="entry-short">${entry.short}</div>
+      <div class="entry-long" id="long-${idx}">${entry.long}</div>
+    `;
+    entriesContainer.appendChild(div);
+  });
+
+  document.querySelectorAll(".entry-expand-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const i = btn.getAttribute("data-idx");
+      const longDiv = document.getElementById("long-" + i);
+      const isVisible = longDiv.classList.contains("visible");
+      longDiv.classList.toggle("visible");
+      btn.textContent = isVisible ? "mehr" : "weniger";
+    });
+  });
+}
+
+searchInput.addEventListener("input", () => {
+  renderEntries(searchInput.value);
+});
+
+renderEntries();
+</script>
+
+</body>
+</html>
