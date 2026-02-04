@@ -137,3 +137,21 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Blockchain / Hardhat / Foundry specific
+cache/
+artifacts/
+typechain/
+typechain-types/
+out/
+broadcast/
+deployments/
+*.gas-snapshot
+.openzeppelin/
+
+# Private keys and secrets
+*.key
+*.pem
+*.secret
+mnemonic.txt
+private_key.txt
