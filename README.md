@@ -104,13 +104,111 @@ See [DEVELOPMENT_SETUP.md](./DEVELOPMENT_SETUP.md) for detailed comparison and s
 - [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)
 - [Ethereum Development Documentation](https://ethereum.org/en/developers/docs/)
 
+## Featured Project: Diamond Governance Questionnaire
+
+This repository includes a **complete Diamond Standard implementation** of a DAO governance and signer election system with community assessments!
+
+### 🎉 World's First Diamond-Based Questionnaire System
+
+The **Diamond Governance Questionnaire** is likely the first comprehensive assessment/questionnaire system built using the Diamond Standard (EIP-2535). It demonstrates the power of modular, upgradeable smart contracts.
+
+### Key Features
+
+**1. Candidate Nomination System**
+- Community members can nominate candidates for signer positions
+- Support for short statements (280 chars) or IPFS links for longer descriptions
+- Nomination withdrawal capability
+- Prevents self-nomination
+
+**2. Community Assessment System**
+- Unique 4-trait scoring system (100 points total per candidate):
+  - Technical Competence (0-100)
+  - Reliability & Commitment (0-100)
+  - Communication & Transparency (0-100)
+  - Alignment with DAO Values (0-100)
+- Median-based score aggregation (resistant to outliers)
+- Optional 69-character feedback
+- Anonymous voting (wallet addresses not exposed)
+- Real-time leaderboard
+
+**3. Signer Availability Tracking**
+- Status management (Active, OnLeave, Inactive, Removed)
+- Real-time availability signaling
+- Batch operations for efficiency
+
+**4. Performance Monitoring**
+- Automatic signature tracking
+- Reliability score calculation (0-100)
+- Performance leaderboards
+- Underperformer identification
+
+### Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Compile contracts
+npm run compile
+
+# Run tests
+npm test
+
+# Deploy to local network
+npm run node
+npm run deploy:local
+
+# Deploy to Sepolia testnet
+npm run deploy:sepolia
+```
+
+### Interacting with the System
+
+```javascript
+const diamond = await ethers.getContractAt("Diamond", diamondAddress);
+const nomination = await ethers.getContractAt("NominationFacet", diamondAddress);
+const assessment = await ethers.getContractAt("AssessmentFacet", diamondAddress);
+
+// Open nomination phase
+await nomination.setNominationPhaseStatus(true);
+
+// Nominate candidate
+await nomination.nominate(candidateAddress, "Excellent technical skills");
+
+// Open assessment phase
+await assessment.setAssessmentPhaseStatus(true);
+
+// Assess candidate (4 trait scores totaling 100)
+await assessment.assessCandidate(
+  candidateAddress,
+  [40, 30, 20, 10],
+  "Strong technical background"
+);
+
+// View leaderboard
+const [candidates, scores, totals] = await assessment.getLeaderboard();
+console.log("Leaderboard:", candidates, scores, totals);
+```
+
+### Architecture
+
+See [contracts/README.md](./contracts/README.md) for detailed architecture documentation.
+
+### Gas Costs
+
+Estimated costs on Sepolia:
+- Nominate: ~50,000 gas (~$0.10)
+- Assess: ~80,000 gas (~$0.15)
+- Update status: ~30,000 gas (~$0.05)
+- Record signature: ~40,000 gas (~$0.08)
+
 ## Next Steps
 
 1. Set up your development environment using our guides
 2. Understand the Diamond Standard architecture
-3. Build your first Diamond contract
+3. Explore the Diamond Governance Questionnaire implementation
 4. Deploy to testnet (Sepolia, Mumbai)
-5. Implement upgradeable facets
+5. Customize facets for your use case
 6. Learn gas optimization techniques
 
 ## Contributing
